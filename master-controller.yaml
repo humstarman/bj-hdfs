@@ -1,0 +1,51 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  namespace: default 
+  name: hadoop-hdfs-master
+spec:
+  serviceName: "hadoop-hdfs-master"
+  podManagementPolicy: Parallel
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: hadoop-hdfs
+        app: hadoop-hdfs-master
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: hadoop-hdfs-master
+          image: 10.254.0.50:5000/hadoop:latest 
+          env:
+            - name: HADOOP_NODE_TYPE 
+              value: namenode
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: HADOOP_MASTER_SERVICE 
+              valueFrom:
+                configMapKeyRef:
+                  name: hadoop-conf
+                  key: HDFS_MASTER_SERVICE
+            - name: HDOOP_YRAN_MASTER 
+              valueFrom:
+                configMapKeyRef:
+                  name: hadoop-conf
+                  key: HADOOP_YARN_MASTER
+          ports:
+            - containerPort: 9000
+            - containerPort: 50070
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+              readOnly: true
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime

@@ -1,0 +1,52 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  namespace: default 
+  name: yarn-node3
+spec:
+  serviceName: "yarn-node3"
+  podManagementPolicy: Parallel
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: hadoop-hdfs
+        app: yarn-node3
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: yarn-node3
+          image: 10.254.0.50:5000/hadoop:latest 
+          env:
+            - name: HADOOP_NODE_TYPE 
+              value: yarnnode 
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: HADOOP_MASTER_SERVICE 
+              valueFrom:
+                configMapKeyRef:
+                  name: hadoop-conf
+                  key: HDFS_MASTER_SERVICE
+            - name: HDOOP_YRAN_MASTER 
+              valueFrom:
+                configMapKeyRef:
+                  name: hadoop-conf
+                  key: HADOOP_YARN_MASTER
+          ports:
+            - containerPort: 8040
+            - containerPort: 8041
+            - containerPort: 8042
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+              readOnly: true
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
