@@ -33,7 +33,7 @@ spec:
                 configMapKeyRef:
                   name: hadoop-conf
                   key: HDFS_MASTER_SERVICE
-            - name: HDOOP_YRAN_MASTER 
+            - name: HADOOP_YRAN_MASTER 
               valueFrom:
                 configMapKeyRef:
                   name: hadoop-conf
